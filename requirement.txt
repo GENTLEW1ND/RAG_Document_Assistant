@@ -1,0 +1,15 @@
+langchain
+langchain-community
+langchain-core
+langchain-groq
+langchain-openai
+langchain-huggingface
+langchain-chroma
+unstructured[all-docs]
+python-dotenv
+rank_bm25
+langchain-classic
+langchain-cohere
+streamlit
+
+
