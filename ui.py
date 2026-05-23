@@ -2,6 +2,7 @@ import streamlit as st
 import tempfile
 import hashlib
 from Main import setup_pipeline, run_pipeline
+from langchain_core.messages import HumanMessage, AIMessage
 
 st.set_page_config(page_title="RAG Assistant", layout="wide")
 st.title("📄 RAG Document Assistant")
@@ -16,7 +17,7 @@ if "file_hash" not in st.session_state:
     st.session_state.vec_chunks = None
     st.session_state.sum_chunks = None
     st.session_state.file_path = None
-
+    st.session_state.chat_history = []
 
 # -----------------------------
 # HELPERS
@@ -60,6 +61,9 @@ if uploaded_file:
         st.session_state.vec_chunks = vec_chunks
         st.session_state.sum_chunks = sum_chunks
         st.session_state.file_path = file_path
+        
+        # ✅ CLEAR OLD CHAT HISTORY
+        st.session_state.chat_history = []
 
     else:
         st.success("Using existing document ✅")
@@ -85,7 +89,8 @@ if st.session_state.vec_chunks:
                 answer, docs = run_pipeline(
                     query,
                     st.session_state.vec_chunks,
-                    st.session_state.sum_chunks
+                    st.session_state.sum_chunks,
+                    st.session_state.chat_history
                 )
 
             # -----------------------------
@@ -93,7 +98,16 @@ if st.session_state.vec_chunks:
             # -----------------------------
             st.subheader("🧠 Answer")
             st.write(answer)
+            
+            # Save conversation
+            st.session_state.chat_history.append(
+                HumanMessage(content=query)
+            )
 
+            st.session_state.chat_history.append(
+                AIMessage(content=answer)
+            )
+            
             # Debug view
             with st.expander("📄 Retrieved Chunks"):
                 for i, doc in enumerate(docs, 1):
@@ -114,4 +128,5 @@ if st.session_state.vec_chunks:
         st.session_state.vec_chunks = None
         st.session_state.sum_chunks = None
         st.session_state.file_path = None
+        st.session_state.chat_history = []
         st.rerun()

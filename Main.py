@@ -6,6 +6,7 @@ from Retrival.MultiQuery import generate_query_variations
 from Retrival.DenseAndSparse import two_retrievers
 from Retrival.Hybrid import reciprocal_rank_fusion
 from Retrival.History import ask_question
+from Retrival.ConversationalContext import build_conversation_context
 from ReRanker.Re_Ranker import reranker
 from Llm.LlmGenerator import generator
 
@@ -28,13 +29,24 @@ def setup_pipeline(document_path):
 
 
 
-def run_pipeline(query, vec_chunks, sum_chunks):
+def run_pipeline(query, vec_chunks, sum_chunks,chat_history):
 
     # Query rewrite
-    restructured_query = ask_question(query)
+    restructured_query, history = ask_question(query, chat_history)
 
+    #Conversation Context history
+    conversational_context = build_conversation_context(history)
+    
+    retrieval_query = f"""
+    Conversation Context:
+    {conversational_context}
+
+    Current Question:
+    {restructured_query}
+    """
+    
     # Multi-query
-    query_variations = generate_query_variations(restructured_query)
+    query_variations = generate_query_variations(retrieval_query)
 
     # Retrieval
     vec_chunk, key_chunks = two_retrievers(vec_chunks, sum_chunks, query_variations)
@@ -47,10 +59,10 @@ def run_pipeline(query, vec_chunks, sum_chunks):
     top_k_chunk = [doc for doc, _ in retrieved_chunk[:10]]
 
     # Rerank
-    reranked_chunks = reranker(top_k_chunk, query)
+    reranked_chunks = reranker(top_k_chunk, retrieval_query)
 
     # Final Answer
-    result = generator(query, reranked_chunks)
+    result = generator(retrieval_query, reranked_chunks)
 
     return result, reranked_chunks
 
