@@ -9,7 +9,7 @@ def document_partitioning(file_path:str):
 
     elements = partition_pdf(
         filename = file_path,
-        strategy = "hi_res",
+        strategy = "fast",
         infer_table_structure=True,
         extract_image_block_types=['Image'],
         extract_image_block_to_payload=True

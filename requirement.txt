@@ -1,15 +1,15 @@
 langchain
 langchain-community
 langchain-core
-langchain-groq
 langchain-openai
-langchain-huggingface
 langchain-chroma
-unstructured[all-docs]
+langchain-cohere
+
+streamlit
 python-dotenv
 rank_bm25
-langchain-classic
-langchain-cohere
-streamlit
 
+unstructured[pdf]
 
+chromadb
+pypdf
